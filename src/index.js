@@ -7,7 +7,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const pixabayApi = new PixabayApi();
 
-const handelSubmit = event => {
+const handelSubmit = async event => {
   event.preventDefault();
 
   const {
@@ -22,38 +22,36 @@ const handelSubmit = event => {
   pixabayApi.searchQuery = query;
   clearPage();
 
-  pixabayApi
-    .getPhotos()
-    .then(({ hits, totalHits }) => {
-      const markup = createMarkup(hits);
-      refs.gallery.insertAdjacentHTML('beforeend', markup);
-      pixabayApi.calculateTotalPages(totalHits);
+  try {
+    const { hits, totalHits } = await pixabayApi.getPhotos();
+    const markup = createMarkup(hits);
+    refs.gallery.insertAdjacentHTML('beforeend', markup);
+    pixabayApi.calculateTotalPages(totalHits);
 
-      let lightbox = new SimpleLightbox('.photo-card a', {
-        captions: true,
-        captionsData: 'alt',
-        captionDelay: 250,
-      });
-
-      if (pixabayApi.isShowLoadMore) {
-        refs.loadMore.classList.remove('is-hidden');
-      }
-      if (totalHits === 0) {
-        Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      } else {
-        Notify.info(`Hooray! We found ${totalHits} images.`);
-      }
-    })
-    .catch(eror => {
-      Notify.failure(eror.message, 'something went wrong try more');
-
-      clearPage();
+    let lightbox = new SimpleLightbox('.photo-card a', {
+      captions: true,
+      captionsData: 'alt',
+      captionDelay: 250,
     });
+
+    if (pixabayApi.isShowLoadMore) {
+      refs.loadMore.classList.remove('is-hidden');
+    }
+    if (totalHits === 0) {
+      Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    } else {
+      Notify.info(`Hooray! We found ${totalHits} images.`);
+    }
+  } catch (error) {
+    Notify.failure(error.message, 'something went wrong try more');
+
+    clearPage();
+  }
 };
 
-const BtnloadMore = () => {
+const BtnloadMore = async () => {
   pixabayApi.incrementPage();
 
   if (!pixabayApi.isShowLoadMore) {
@@ -61,16 +59,14 @@ const BtnloadMore = () => {
     Notify.info('Were sorry, but youve reached the end of search results.');
   }
 
-  pixabayApi
-    .getPhotos()
-    .then(({ hits, totalHits }) => {
-      const markup = createMarkup(hits);
-      refs.gallery.insertAdjacentHTML('beforeend', markup);
-    })
-    .catch(eror => {
-      Notify.failure(eror.message, 'something went wrong try more');
-      clearPage();
-    });
+  try {
+    const { hits } = await pixabayApi.getPhotos();
+    const markup = createMarkup(hits);
+    refs.gallery.insertAdjacentHTML('beforeend', markup);
+  } catch (error) {
+    Notify.failure(error.message, 'something went wrong try more');
+    clearPage();
+  }
 };
 
 refs.form.addEventListener('submit', handelSubmit);
