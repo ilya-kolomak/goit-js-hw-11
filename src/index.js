@@ -30,6 +30,18 @@ let lightbox = new SimpleLightbox('.photo-card a', {
 const handelSubmit = async event => {
   event.preventDefault();
 
+  const {
+    elements: { searchQuery },
+  } = event.currentTarget;
+
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) {
+    Notify.failure('enter data to search!');
+    return;
+  }
+  pixabayApi.searchQuery = query;
+  clearPage();
+
   try {
     const { hits, totalHits } = await pixabayApi.getPhotos();
     const markup = createMarkup(hits);
