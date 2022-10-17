@@ -7,6 +7,20 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const pixabayApi = new PixabayApi();
 
+// const options = {
+//   root: null,
+//   rootMargin: '100px',
+//   threshold: 1.0,
+// };
+// const callback = function (entries, observer) {
+//   entries.forEach(entry => {
+//     if (entry.isIntersecting && entry.intersectionRect.bottom > 550) {
+//       pixabayApi.incrementPage();
+//     }
+//   });
+// };
+// const io = new IntersectionObserver(callback, options);
+
 const handelSubmit = async event => {
   event.preventDefault();
 
@@ -26,6 +40,9 @@ const handelSubmit = async event => {
     const { hits, totalHits } = await pixabayApi.getPhotos();
     const markup = createMarkup(hits);
     refs.gallery.insertAdjacentHTML('beforeend', markup);
+    // const target = document.querySelector('.photo-card:last-child');
+    // io.observe(target);
+
     pixabayApi.calculateTotalPages(totalHits);
 
     let lightbox = new SimpleLightbox('.photo-card a', {
@@ -63,6 +80,11 @@ const BtnloadMore = async () => {
     const { hits } = await pixabayApi.getPhotos();
     const markup = createMarkup(hits);
     refs.gallery.insertAdjacentHTML('beforeend', markup);
+    let lightbox = new SimpleLightbox('.photo-card a', {
+      captions: true,
+      captionsData: 'alt',
+      captionDelay: 250,
+    });
   } catch (error) {
     Notify.failure(error.message, 'something went wrong try more');
     clearPage();
