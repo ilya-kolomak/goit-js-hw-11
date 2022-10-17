@@ -7,6 +7,12 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const pixabayApi = new PixabayApi();
 
+let lightbox = new SimpleLightbox('.photo-card a', {
+  captions: true,
+  captionsData: 'alt',
+  captionDelay: 250,
+});
+
 // const options = {
 //   root: null,
 //   rootMargin: '100px',
@@ -24,18 +30,6 @@ const pixabayApi = new PixabayApi();
 const handelSubmit = async event => {
   event.preventDefault();
 
-  const {
-    elements: { searchQuery },
-  } = event.currentTarget;
-
-  const query = searchQuery.value.trim().toLowerCase();
-  if (!query) {
-    Notify.failure('enter data to search!');
-    return;
-  }
-  pixabayApi.searchQuery = query;
-  clearPage();
-
   try {
     const { hits, totalHits } = await pixabayApi.getPhotos();
     const markup = createMarkup(hits);
@@ -44,12 +38,6 @@ const handelSubmit = async event => {
     // io.observe(target);
 
     pixabayApi.calculateTotalPages(totalHits);
-
-    let lightbox = new SimpleLightbox('.photo-card a', {
-      captions: true,
-      captionsData: 'alt',
-      captionDelay: 250,
-    });
 
     if (pixabayApi.isShowLoadMore) {
       refs.loadMore.classList.remove('is-hidden');
@@ -80,11 +68,7 @@ const BtnloadMore = async () => {
     const { hits } = await pixabayApi.getPhotos();
     const markup = createMarkup(hits);
     refs.gallery.insertAdjacentHTML('beforeend', markup);
-    let lightbox = new SimpleLightbox('.photo-card a', {
-      captions: true,
-      captionsData: 'alt',
-      captionDelay: 250,
-    });
+    lightbox.refresh();
   } catch (error) {
     Notify.failure(error.message, 'something went wrong try more');
     clearPage();
